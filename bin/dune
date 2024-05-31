@@ -1,0 +1,34 @@
+(ocamllex lexer)
+
+(library
+ (name lexer)
+ (modules lexer)
+ (libraries lexical))
+
+(library
+ (name lexical)
+ (modules lexical))
+
+(library
+ (name syntactics)
+ (modules syntactics))
+
+(menhir
+ (modules parser)
+ (flags --external-tokens=Lexical.Token --table --dump))
+
+(library
+ (name parser)
+ (modules parser)
+ (libraries lexical syntactics menhirLib))
+
+(library
+ (name parse)
+ (modules parse)
+ (libraries lexical syntactics lexer parser))
+
+(executable
+ (public_name mlisp)
+ (name main)
+ (modules main)
+ (libraries lexical syntactics parse))
