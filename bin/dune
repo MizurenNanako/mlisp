@@ -27,6 +27,11 @@
  (modules parse)
  (libraries lexical syntactics lexer parser))
 
+(library
+ (name semantics)
+ (modules semantics)
+ (libraries syntactics))
+
 (executable
  (public_name mlisp)
  (name main)

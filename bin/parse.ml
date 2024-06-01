@@ -1,23 +1,6 @@
 module Error = struct
-  let range_to_string ((a : Lexing.position), (b : Lexing.position)) =
-    if a.pos_fname = b.pos_fname then
-      if a.pos_lnum = b.pos_lnum then
-        Printf.sprintf "%s:%i:%i-%i" a.pos_fname a.pos_lnum
-          (a.pos_cnum - a.pos_bol + 1)
-          (b.pos_cnum - b.pos_bol + 1)
-      else
-        Printf.sprintf "%s:%i:%i-%i:%i" a.pos_fname a.pos_lnum
-          (a.pos_cnum - a.pos_bol + 1)
-          b.pos_lnum
-          (b.pos_cnum - b.pos_bol + 1)
-    else
-      Printf.sprintf "%s:%i:%i-%s:%i:%i" a.pos_fname a.pos_lnum
-        (a.pos_cnum - a.pos_bol + 1)
-        b.pos_fname b.pos_lnum
-        (b.pos_cnum - b.pos_bol + 1)
-
   let report_range out rng =
-    rng |> range_to_string |> output_string out
+    rng |> Lexical.Range.to_string |> output_string out
 end
 
 module Driver = struct
@@ -44,8 +27,8 @@ module Driver = struct
           match I.acceptable savepoint T.RP r2 with
           | true ->
               let fixed = I.offer savepoint (T.RP, r1, r2) in
-              Printf.eprintf "Inserted \')\' in %a\n" Error.report_range
-                (r1, r2);
+              Printf.eprintf "Inserted \')\' in %a\n"
+                Error.report_range (r1, r2);
               loop savepoint fixed
           | false ->
               Printf.eprintf "FatalError in %a\n" Error.report_range
