@@ -25,6 +25,17 @@ rule get_token = parse
     let p2 = lexbuf.lex_curr_p in
     Tstring (s, (p1, p2))
 }
+(* car cdr cadr ... cxxxxxr *)
+| 'c' (['a' 'd']+ as s) 'r' 
+{
+    let ss = String.fold_right (fun c acc -> 
+        match c with 
+        | 'a' -> false :: acc 
+        | 'd' -> true :: acc 
+        | _ -> acc) s []
+    in
+    CXR (ss, Range.of_lexbuf lexbuf)
+}
 | atom as s { Tstring (s, Range.of_lexbuf lexbuf) }
 | _ as c { raise (LexicalError (Printf.sprintf "unsupported character: %c" c)) }
 

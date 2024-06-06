@@ -38,8 +38,13 @@
  (libraries common lexical syntactics))
 
 (library
+ (name native)
+ (modules native))
+
+(library
  (name typing)
- (modules typing))
+ (modules typing)
+ (libraries native))
 
 (executable
  (public_name mlisp)

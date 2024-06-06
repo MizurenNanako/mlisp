@@ -59,6 +59,7 @@ module Token = struct
     | RP of Range.t
     | Tstring of string ranged
     | QUOTE of Range.t
+    | CXR of bool list ranged
     | EOF
 
   let to_string (t : token) =
@@ -67,6 +68,12 @@ module Token = struct
     | RP _ -> ")"
     | Tstring (str, r) -> str ^ Range.str r
     | QUOTE _ -> "\'"
+    | CXR (l, r) ->
+        (l
+        |> List.map (fun c ->
+               match c with false -> 'a' | true -> 'd')
+        |> List.to_seq |> String.of_seq)
+        ^ Range.str r
     | EOF -> "#"
 
   let dump out t = t |> to_string |> output_string out
