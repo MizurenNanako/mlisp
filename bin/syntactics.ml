@@ -37,11 +37,11 @@ module AST = struct
     match a with
     | Atom (s, r) -> fprintf out "\"%s\"<%s>" s (R.str r)
     | List (l, r) ->
-        fprintf out "%a<%s>" (dump_list dump_rng) l (R.str r)
+        fprintf out "%a<%s>" (dump_list dump_rng " ") l (R.str r)
 
   let rec dump out a =
     let open Printf in
     match a with
     | Atom (s, _) -> fprintf out "\"%s\"" s
-    | List (l, _) -> fprintf out "%a" (dump_list dump) l
+    | List (l, _) -> fprintf out "%a" (dump_list dump " ") l
 end
