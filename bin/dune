@@ -35,16 +35,11 @@
 (library
  (name semantics)
  (modules semantics)
- (libraries common lexical syntactics))
-
-(library
- (name native)
- (modules native))
+ (libraries common lexical syntactics typing))
 
 (library
  (name typing)
- (modules typing)
- (libraries native))
+ (modules typing))
 
 (executable
  (public_name mlisp)
