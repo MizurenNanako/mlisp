@@ -1,11 +1,12 @@
 %{
+    open Lexical
     open Syntactics.AST
 %}
 
-%token LP
-%token RP
-%token <string> Tstring
-%token QUOTE
+%token <Lexical.Range.t> LP
+%token <Lexical.Range.t> RP
+%token <string * Lexical.Range.t> Tstring
+%token <Lexical.Range.t> QUOTE
 %token EOF
 
 
@@ -16,14 +17,15 @@ program:
 | l = sexp*; EOF { l }
 
 sexp:
-| QUOTE; q = sexp { List [Atom "quote"; q] }
+| r = QUOTE; q = sexp { List ([Atom ("quote", r); q], Range.join r (get_rng q)) }
 | a = sexp_atom { a }
 | l = sexp_list { l }
 
 sexp_atom:
-| s = Tstring { Atom s }
+| s = Tstring { Atom (fst s, snd s) }
 
 sexp_list:
-| LP; l = sexp* ; RP { List l }
+| r1 = LP; l = sexp* ; r2 = RP { List (l, (Range.join r1 r2)) }
+
 
 

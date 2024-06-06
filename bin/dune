@@ -1,3 +1,7 @@
+(library
+ (name common)
+ (modules common))
+
 (ocamllex lexer)
 
 (library
@@ -11,7 +15,8 @@
 
 (library
  (name syntactics)
- (modules syntactics))
+ (modules syntactics)
+ (libraries common lexical))
 
 (menhir
  (modules parser)
@@ -30,7 +35,11 @@
 (library
  (name semantics)
  (modules semantics)
- (libraries syntactics))
+ (libraries common lexical syntactics))
+
+(library
+ (name typing)
+ (modules typing))
 
 (executable
  (public_name mlisp)

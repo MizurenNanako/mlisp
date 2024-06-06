@@ -2,28 +2,13 @@ module Error = struct
   exception LexicalError of string
 end
 
-module Token = struct
-  type token = LP | RP | Tstring of string | QUOTE | EOF
-
-  let to_string (t : token) =
-    match t with
-    | LP -> "("
-    | RP -> ")"
-    | Tstring str -> str
-    | QUOTE -> "\'"
-    | EOF -> "#"
-
-  let dump out t = t |> to_string |> output_string out
-end
-
 module Range = struct
   type pos = Lexing.position
   type range = pos * pos
   type t = range
-  type 'a ranged = [ `Ranged of 'a * range ]
 
   let join (a : t) (b : t) = (fst a, snd b)
-  let extract_range (`Ranged (_, b) : 'a ranged) = b
+  let of_lexbuf (a : Lexing.lexbuf) : t = (a.lex_start_p, a.lex_curr_p)
 
   let to_string ((a : Lexing.position), (b : Lexing.position)) =
     if a.pos_fname = b.pos_fname then
@@ -41,4 +26,48 @@ module Range = struct
         (a.pos_cnum - a.pos_bol + 1)
         b.pos_fname b.pos_lnum
         (b.pos_cnum - b.pos_bol + 1)
+
+  let str ((s : Lexing.position), (e : Lexing.position)) =
+    if s.pos_lnum = e.pos_lnum then
+      Printf.sprintf "%i:%i-%i" s.pos_lnum
+        (s.pos_cnum - s.pos_bol + 1)
+        (e.pos_cnum - e.pos_bol + 1)
+    else
+      Printf.sprintf "%i:%i-%i:%i" s.pos_lnum
+        (s.pos_cnum - s.pos_bol + 1)
+        e.pos_lnum
+        (e.pos_cnum - e.pos_bol + 1)
+end
+
+module Ranged = struct
+  type range = Range.t
+  type 'a t = 'a * range
+
+  let rngstr (x : 'a t) : string =
+    let s, e = snd x in
+    Printf.sprintf "%i:%i-%i:%i" s.pos_lnum
+      (s.pos_cnum - s.pos_bol + 1)
+      e.pos_lnum
+      (e.pos_cnum - e.pos_bol + 1)
+end
+
+module Token = struct
+  type 'a ranged = 'a Ranged.t
+
+  type token =
+    | LP of Range.t
+    | RP of Range.t
+    | Tstring of string ranged
+    | QUOTE of Range.t
+    | EOF
+
+  let to_string (t : token) =
+    match t with
+    | LP _ -> "("
+    | RP _ -> ")"
+    | Tstring (str, r) -> str ^ Range.str r
+    | QUOTE _ -> "\'"
+    | EOF -> "#"
+
+  let dump out t = t |> to_string |> output_string out
 end
