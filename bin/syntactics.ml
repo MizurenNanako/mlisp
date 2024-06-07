@@ -16,9 +16,12 @@ module AST = struct
   let rec to_string_with_rng a =
     let open Printf in
     match a with
-    | Atom (s, r) -> sprintf "\027[33m%s \027[32m%s\027[0m" s (R.str r)
+    | Atom (s, r) ->
+        sprintf "\027[33m%s \027[32m%s\027[0m" s (R.str r)
     | List (l, r) ->
-        let s1 = l |> List.map to_string_with_rng |> String.concat " " in
+        let s1 =
+          l |> List.map to_string_with_rng |> String.concat " "
+        in
         let s2 = R.str r in
         sprintf "\027[31m(%s\027[31m)\027[34m%s\027[0m" s1 s2
 
@@ -45,3 +48,14 @@ module AST = struct
     | Atom (s, _) -> fprintf out "\"%s\"" s
     | List (l, _) -> fprintf out "%a" (dump_list dump " ") l
 end
+
+(** returns [(count, list)] if check passes,
+    [(-1, [])] if check failed *)
+let string_list_of_atom_list (atlst : AST.t list) =
+  let rec h accn accl l =
+    match l with
+    | [] -> (accn, List.rev accl)
+    | AST.Atom (a, _) :: tl -> h (accn + 1) (a :: accl) tl
+    | _ -> (-1, [])
+  in
+  h 0 [] atlst

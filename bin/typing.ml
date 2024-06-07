@@ -141,7 +141,11 @@ module AST = struct
       
       However, keywords and type construct is done at this part,
       making it possible to implant macro. *)
-  type t = Atom of atom | Intrinsic of intrinstc | List of t list
+  type t =
+    (* Sexpr *)
+    | Atom of atom
+    | Intrinsic of intrinstc
+    | List of t list
 end
 
 let smart_atom name : AST.t =
