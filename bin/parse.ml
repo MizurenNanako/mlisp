@@ -12,7 +12,7 @@ module Driver = struct
   module I = P.MenhirInterpreter
   module A = Syntactics.AST
 
-  let fix_error env savepoint =
+  let fix_error env savepoint : A.expression list I.checkpoint =
     let r1, r2 = I.positions env in
     let rp = T.RP (r2, r2) in
     match I.acceptable savepoint rp r2 with

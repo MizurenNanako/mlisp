@@ -1,6 +1,7 @@
 {
     open Lexical.Error
     open Lexical.Token
+    open Lexical.Literal
     open Lexical
 }
 
@@ -9,6 +10,21 @@ let ns = ['\n']
 let reserved = ['(' ')' '\'' ';']
 let atom = (_ # ws # ns # reserved)+
 let quotemark = "\'"
+
+let zero          = '0'
+let identifier    = ['A'-'Z' 'a'-'z' '_' '$']+ ['A'-'Z' 'a'-'z' '0'-'9' '_' '$']*
+let oct_char      = ['0'-'7']
+let hex_char      = ['0'-'9' 'A'-'F' 'a'-'f']
+let numbody       = ['0'-'9' '\'']
+let literal_dec   = ['+' '-']? ['1'-'9'] numbody* | zero
+let literal_oct   = zero ['0'-'9']+
+let literal_hex   = zero ['x' 'X'] hex_char*
+let literal_bin   = zero ['b' 'B'] ['0' '1']*
+let wholenumber   = ['+' '-']? ['1'-'9'] numbody*
+let fraction      = numbody+
+let significand   = (wholenumber "." fraction) | ("." fraction) | (wholenumber ".")
+let exponent      = ['e' 'E' 'p' 'P'] ['+' '-']? ['0'-'9']+
+let literal_real  = (significand exponent? | wholenumber exponent)
 
 rule get_token = parse
 | ';' { skip_line lexbuf; get_token lexbuf }
@@ -36,7 +52,14 @@ rule get_token = parse
     in
     CXR (ss, Range.of_lexbuf lexbuf)
 }
-| atom as s { Tstring (s, Range.of_lexbuf lexbuf) }
+| (literal_real as s) { Treal (float_of_string s, Range.of_lexbuf lexbuf) }
+| (literal_dec as s) { Tint ((int_of_dec s).data, Range.of_lexbuf lexbuf) }
+| (literal_oct as s) { Tint ((int_of_oct s).data, Range.of_lexbuf lexbuf) }
+| (literal_hex as s) { Tint ((int_of_hex s).data, Range.of_lexbuf lexbuf) }
+| (literal_bin as s) { Tint ((int_of_bin s).data, Range.of_lexbuf lexbuf) }
+| "true" { Tbool (true, Range.of_lexbuf lexbuf) }
+| "false" { Tbool (false, Range.of_lexbuf lexbuf) }
+| atom as s { Tterm (s, Range.of_lexbuf lexbuf) }
 | _ as c { raise (LexicalError (Printf.sprintf "unsupported character: %c" c)) }
 
 and skip_line = parse

@@ -3,13 +3,27 @@ module AST = struct
 
   module R = Lexical.Range
 
+  type mach =
+    | Aint of int64
+    | Areal of float
+    | Abool of bool
+    | Astring of string
+    | Aterm of string
+
   type expression =
-    | Atom of string * range (* a sequence of letters *)
+    | Atom of mach * range (* a sequence of letters *)
     | List of expression list * range
   (* zero or more expressions separated
      by whitespace and enclosed by parentheses *)
 
   type t = expression
+
+  let str_of_mach = function
+    | Aint i -> Int64.to_string i
+    | Areal f -> Printf.sprintf "%f" f
+    | Astring s -> Printf.sprintf "\"%s\"" s
+    | Abool b -> Printf.sprintf "%b" b
+    | Aterm s -> s
 
   let get_rng = function Atom (_, r) | List (_, r) -> r
 
@@ -17,7 +31,8 @@ module AST = struct
     let open Printf in
     match a with
     | Atom (s, r) ->
-        sprintf "\027[33m%s \027[32m%s\027[0m" s (R.str r)
+        sprintf "\027[33m%s \027[32m%s\027[0m" (str_of_mach s)
+          (R.str r)
     | List (l, r) ->
         let s1 =
           l |> List.map to_string_with_rng |> String.concat " "
@@ -28,7 +43,7 @@ module AST = struct
   let rec to_string a =
     let open Printf in
     match a with
-    | Atom (s, _) -> sprintf "\"%s\"" s
+    | Atom (s, _) -> sprintf "\"%s\"" (str_of_mach s)
     | List (l, _) ->
         let s1 = l |> List.map to_string |> String.concat " " in
         sprintf "(%s)" s1
@@ -38,14 +53,15 @@ module AST = struct
   let rec dump_rng out a =
     let open Printf in
     match a with
-    | Atom (s, r) -> fprintf out "\"%s\"<%s>" s (R.str r)
+    | Atom (s, r) ->
+        fprintf out "\"%s\"<%s>" (str_of_mach s) (R.str r)
     | List (l, r) ->
         fprintf out "%a<%s>" (dump_list dump_rng " ") l (R.str r)
 
   let rec dump out a =
     let open Printf in
     match a with
-    | Atom (s, _) -> fprintf out "\"%s\"" s
+    | Atom (s, _) -> fprintf out "\"%s\"" (str_of_mach s)
     | List (l, _) -> fprintf out "%a" (dump_list dump " ") l
 end
 

@@ -33,13 +33,14 @@
  (libraries lexical syntactics lexer parser))
 
 (library
- (name semantics)
- (modules semantics)
- (libraries common lexical syntactics typing))
+ (name typing)
+ (modules typing)
+ (libraries syntactics))
 
 (library
- (name typing)
- (modules typing))
+ (name semantics)
+ (modules semantics)
+ (libraries typing))
 
 (executable
  (public_name mlisp)
