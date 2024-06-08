@@ -35,7 +35,9 @@
 (library
  (name typing)
  (modules typing)
- (libraries syntactics))
+ (preprocess
+  (pps ppx_sexp_conv))
+ (libraries syntactics sexplib))
 
 (library
  (name semantics)
@@ -46,4 +48,4 @@
  (public_name mlisp)
  (name main)
  (modules main)
- (libraries lexical syntactics parse))
+ (libraries lexical syntactics semantics parse))

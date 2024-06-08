@@ -7,7 +7,7 @@
 
 let ws = [' ']
 let ns = ['\n']
-let reserved = ['(' ')' '\'' ';']
+let reserved = ['(' ')' '\'' ';' '\"']
 let atom = (_ # ws # ns # reserved)+
 let quotemark = "\'"
 
