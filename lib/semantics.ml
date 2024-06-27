@@ -50,10 +50,21 @@ module Checking = struct
     | CallExpr c -> _call a.expr_rng env c
     | CondExpr c -> _branch a.expr_rng env c.cond_branch
     | ExportExpr e -> _export a.expr_rng env e
+    | AList l -> _list a.expr_rng env l
+
+  and _list rng env a =
+    ignore rng;
+    let retty = M.Mlist in
+    let cc = List.map (_expr'' env) a in
+    retty, env, cc_list cc retty
 
   and _expr' env a =
     let a, _, b = _expr env a in
     a, b
+
+  and _expr'' env a =
+    let _, _, b = _expr env a in
+    b
 
   and _lambda rng env lam =
     ignore rng;

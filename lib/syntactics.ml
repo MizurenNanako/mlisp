@@ -25,6 +25,7 @@ module AST = struct
     | F64Atom of f64
     | StrAtom of str
     | IdAtom of id
+    | AList of expr list
     | DeclExpr of decl_expr_desc
     | ExtDeclExpr of ext_decl_expr_desc
     | LocalDeclExpr of local_decl_expr_desc
@@ -125,6 +126,20 @@ module Format = struct
     | ExtDeclExpr e -> fmt_ext_decl out e
     | LocalDeclExpr e -> fmt_local_decl level out e
     | ExportExpr e -> fmt_export out e
+    | AList l ->
+      output_char out '{';
+      fmt_expr_list level out l;
+      output_char out '}';
+      output_char out '\n'
+
+  and fmt_expr_list level out l =
+    match l with
+    | [] -> ()
+    | [ a ] -> fmt_expr level out a
+    | a :: tl ->
+      fmt_expr level out a;
+      output_string out ", ";
+      fmt_expr_list level out tl
 
   and fmt_atom out a =
     let open Printf in

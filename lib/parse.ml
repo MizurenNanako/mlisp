@@ -4,7 +4,7 @@ module Driver = struct
   module Msg = Error_messages
 
   let rec _run
-    (lexbuf : Lexing.lexbuf)
+    (lex : unit -> Lexical.Token.token)
     (checkpoint : A.expr list I.checkpoint)
     (lastpoint : A.expr list I.checkpoint)
     =
@@ -13,41 +13,39 @@ module Driver = struct
     | I.Rejected -> []
     | I.AboutToReduce _ ->
       let cp = I.resume checkpoint in
-      _run lexbuf cp lastpoint
+      _run lex cp lastpoint
     | I.Shifting _ ->
       let cp = I.resume checkpoint in
-      _run lexbuf cp lastpoint
+      _run lex cp lastpoint
     | I.InputNeeded _ ->
       let tk =
-        try Lexer.get_token lexbuf with
+        try lex () with
         | Lexical.Error.LexicalError (msg, _) ->
           Printf.eprintf
             "LexicalError: %s at %a\n"
             msg
             Lexical.Range.dump
-            (lexbuf |> Lexical.Range.of_lexbuf);
+            (Lexer.lb () |> Lexical.Range.of_lexbuf);
           exit 0
       in
-      let pL = lexbuf.lex_start_p in
-      let pR = lexbuf.lex_curr_p in
+      let pL = Lexer.start_p () in
+      let pR = Lexer.curr_p () in
       let cp = I.offer checkpoint (tk, pL, pR) in
-      _run lexbuf cp checkpoint
+      _run lex cp checkpoint
     | I.HandlingError e ->
       let state_num = I.current_state_number e in
       let msg = Msg.message state_num in
       Printf.eprintf
-        "SyntaxError: at %a\n%s"
+        "SyntaxError: at %a\n%s\n"
         Lexical.Range.dump
-        (lexbuf |> Lexical.Range.of_lexbuf)
+        (Lexer.lb () |> Lexical.Range.of_lexbuf)
         msg;
-      []
+      exit (-1)
   ;;
 
   let run (filename : string) : A.expr list =
-    let file = In_channel.open_text filename in
-    let lexbuf = Lexing.from_channel file in
-    Lexing.set_filename lexbuf filename;
-    let startpoint = Parser.Incremental.start lexbuf.lex_curr_p in
-    _run lexbuf startpoint startpoint
+    let lex = Lexer.init filename in
+    let startpoint = Parser.Incremental.start (Lexer.curr_p ()) in
+    _run lex startpoint startpoint
   ;;
 end

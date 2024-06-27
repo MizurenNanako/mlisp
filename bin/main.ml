@@ -20,7 +20,8 @@ let run_cl filename =
     |> Sexplib.Sexp.output_hum stdout
     |> print_newline
   with
-  | Semantics.Checking.TypeError (msg, rng) ->
+  | Semantics.Checking.TypeError (msg, rng)
+  | Semantics.Checking.StructureError (msg, rng) ->
     Printf.eprintf
       "SemanticError: %s at %a\n"
       msg
@@ -29,11 +30,9 @@ let run_cl filename =
 ;;
 
 let run_lexer filename =
-  let file = In_channel.open_text filename in
-  let lexbuf = Lexing.from_channel file in
-  Lexing.set_filename lexbuf filename;
+  let lex = Lexer.init filename in
   let rec loop () =
-    let tok = Lexer.get_token lexbuf in
+    let tok = lex () in
     match tok with
     | Lexical.Token.Teof -> ()
     | _ ->
@@ -50,6 +49,7 @@ let mode_lex = ref false
 let mode_parse = ref false
 let mode_format = ref false
 let mode_cl = ref true
+
 (* let mode_lambda = ref false *)
 let input_file = ref ""
 let anon_fun filename = input_file := filename

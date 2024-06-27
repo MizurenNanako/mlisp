@@ -36,6 +36,7 @@ module CAST = struct
     | CAF64 of f64
     | CAStr of str
     | CAId of id
+    | CList of { cc_items : cc_expr list }
 
   and cc_bound_desc =
     { cc_bound_name : id
@@ -80,6 +81,10 @@ module CAST = struct
         CLambda { cc_func_param = paramlist; cc_func_body = body }
     ; cc_expr_ty = func_ty
     }
+  ;;
+
+  let cc_list l ty =
+    { cc_expr_desc = CList { cc_items = l }; cc_expr_ty = ty }
   ;;
 
   let cc_call callee args ret_ty =

@@ -7,6 +7,7 @@ module MType = struct
     | Mi64
     | Mf64
     | Mstr
+    | Mlist
     | Mbytes of int
     | Msig of t * bool ref
     | Mlambda of t list * t
@@ -19,6 +20,7 @@ module MType = struct
   let of_tid (tid : string) =
     match tid with
     | "unit" -> Munit
+    | "list" -> Mlist
     | "i64" | "int" -> Mi64
     | "f64" | "float" -> Mf64
     | "str" | "string" -> Mstr
@@ -37,6 +39,7 @@ module MType = struct
     match t with
     | Munit -> "unit"
     | Merr -> "err"
+    | Mlist -> "list"
     | Mi64 -> "i64"
     | Mf64 -> "f64"
     | Mstr -> "str"

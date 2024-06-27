@@ -190,6 +190,12 @@ primary_expr:
 //     }
 // }
 | "("; e = expr; ")"; { e }
+| posL = "{"; l = separated_list(",", expr); posR = "}"; {
+    {
+        expr_desc = AList l;
+        expr_rng = posL, posR;
+    }
+}
 
 cond_expr:
 | cd = cond;

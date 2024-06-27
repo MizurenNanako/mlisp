@@ -9,7 +9,7 @@ module CC2CL = struct
       (match cc.cc_expr_desc with
        | CAF64 a -> S.Atom (string_of_float a)
        | CAI64 a -> S.Atom (Int64.to_string a)
-       | CAStr a -> S.Atom (a |> String.escaped)
+       | CAStr a -> S.Atom (a |> Printf.sprintf "\"%s\"")
        | CAId a -> S.Atom a
        | CCall c ->
          S.List
@@ -71,6 +71,8 @@ module CC2CL = struct
               ; S.List [ S.List [ name; cl_of_expr value ] ]
               ; ctx
               ])
+       | CList l ->
+         S.List (S.Atom "list" :: (l.cc_items |> List.map cl_of_expr))
        | _ -> assert false)
   ;;
 

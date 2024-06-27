@@ -4,13 +4,31 @@
 
 run `dune b` to build, this project requires `menhirLib` and `ppx_sexp_conv` and `sexplib`.
 
-the product will be a single executable in `_build/default/install/bin`, it should named `mlisp`.
+the product will be a single executable in `_build/default/install/bin`, it should named `spml`.
 
-run it to see help message.
+run it with `-help` to see help message.
+
+note that this program transpile a m-lisp based language to COMMON LISP as its IR, if you want to execute a file, use `sbcl`.
+
+```sh
+dune exec spml <filename.sp> | sbcl --script
+```
+
+See examples in testcases.
 
 ## details
 
 ### Syntax:
+
+#### File Include
+
+Use 
+
+```
+`name
+```
+
+ to include a file with `name`.
 
 #### Let-binding
 
@@ -41,6 +59,16 @@ In top-level, there can be multiple programs(expressions) sharing the same env, 
 #### Typing
 
 Few basic types are provided, like `int` and `float`. Functions like `add[a, b]` where `a, b` are `int` should typed `[int, int] -> int`. Note there is a `unit` type like in ML.
+
+#### List
+
+You can put any type expressions together forming a list:
+
+```
+{1, 2, {3, 4}, "yes"}
+```
+
+This is legal, is a backdoor to common lisp.
 
 #### Primitive
 
