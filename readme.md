@@ -1,5 +1,15 @@
 # m-lisp translater
 
+## build
+
+run `dune b` to build, this project requires `menhirLib` and `ppx_sexp_conv` and `sexplib`.
+
+the product will be a single executable in `_build/default/install/bin`, it should named `mlisp`.
+
+run it to see help message.
+
+## details
+
 ### Syntax:
 
 #### Let-binding
